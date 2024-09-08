@@ -9,6 +9,8 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/', controllers.test)
+app.post('/generateTRONTransferlink', controllers.generateTRONTransferlink)
+app.post('/generateTRX20Transferlink', controllers.generateTRX20Transferlink)
 app.post('/storeToIpfsviapinata', controllers.storeToIpfsviapinata)
 
 app.listen(port, () => {

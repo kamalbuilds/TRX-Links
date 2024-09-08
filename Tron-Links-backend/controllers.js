@@ -37,4 +37,145 @@ async function storeToIpfsviapinata(req, res, next) {
   next()
 }
 
-module.exports = { test, storeToIpfsviapinata }
+async function generateTRONTransferlink(req, res, next) {
+  // 1) Generate HTML for Transfer Tron-Link
+  const id = makeid();
+  const iframe = {
+    html: `
+    <h1>Send btc</h1>
+    <p>Send 1 btc to the following address:</p>
+    <input placeholder="Type the address..." value="0x679a9aa509A85EeA7912D76d85b0b9195972B211" type="text" id="input${id}">
+    <button id="dugme${id}">Send btc</button>`,
+    js: `
+      async function showAlert() {
+          const recipient = document.getElementById("input${id}").value;
+          console.log(window.ethereum);
+          if (typeof window.ethereum !== 'undefined') {
+              try {
+                  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                  const publicKey = accounts[0];
+                  // Specify the amount of BTC to send (in sats)
+                  const amount = "0x" + (1e18).toString(16)
+                  // Transaction parameters
+                  const transactionParameters = {
+                      to: recipient,
+                      from: publicKey,
+                      value: amount,
+                  };
+                  console.log(transactionParameters)
+                  // Send the transaction
+                  const txHash = await ethereum.request({
+                      method: 'eth_sendTransaction',
+                      params: [transactionParameters],
+                  });
+                  alert(\`Transaction Sent! Hash: \${txHash}\`);
+                  // Check the transaction status
+                  const checkTransactionStatus = async (hash) => {
+                      const receipt = await ethereum.request({
+                          method: 'eth_getTransactionReceipt',
+                          params: [hash],
+                      });
+                      if (receipt && receipt.blockNumber) {
+                          alert('Transaction Completed!');
+                      } else {
+                          setTimeout(() => checkTransactionStatus(hash), 1000);
+                      }
+                  };
+                  checkTransactionStatus(txHash);
+              } catch (error) {
+                  alert(\`Error: \${error.message}\`);
+              }
+          } else {
+              alert('MetaMask is not installed');
+          }
+      }
+      document.getElementById('dugme${id}').addEventListener('click', showAlert);
+      `,
+  }
+  // 2) Store the HTML on IPFS
+  let cid
+  try {
+    cid = await publishToIPFS(iframe)
+    console.log(`Transfer Tron-Link published to IPFS with CID: ${cid}`)
+  } catch (error) {
+    console.log(error)
+  }
+
+  // 3) Send the IPFS link to the user
+  const ipfsLink = `https://gateway.ipfs.io/ipfs/${cid}`
+  res.send('Transfer Tron-Link generated. Check it out at: ' + ipfsLink)
+
+  next()
+}
+
+async function generateTRX20Transferlink(req, res, next) {
+  // 1) Generate HTML for Transfer Tron-Link of TRX-20
+  const iframe = {
+    html: `
+      <style>
+      #naslovce {
+          color: #FF0000;
+      }
+      </style>
+      <h1 id="naslovce">Send TRX-20 Token</h1><p>Send tokens to the following address:</p>
+      <input placeholder="Type the address..." value="0xdFB4fbbaf602C76E5B30d0E97F01654D71F23e54" type="text" id="inputAddress">
+      <input placeholder="Type the token amount..." type="number" id="inputAmount">
+      <button id="dugme">Send Token</button>`,
+    js: `
+        console.log('TRX-20 Token Transfer');
+        async function showAlert() {
+          const recipient = document.getElementById("inputAddress").value;
+          const amount = document.getElementById("inputAmount").value;
+          const tokenAddress = ""; // should be TRX-20 Address
+          const decimals = 18;
+          if (typeof window.ethereum !== 'undefined'  ) {
+              try {
+                  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                  const publicKey = accounts[0];
+                  const amountToSend = (amount * Math.pow(10, decimals)).toString(16);
+                  console.log(amountToSend);
+                  const data = "0xa9059cbb" + recipient.substring(2).padStart(64, '0') + amountToSend.padStart(64, '0');
+                  const transactionParameters = {
+                      to: tokenAddress,
+                      from: publicKey,
+                      data: data,
+                  };
+                  console.log(transactionParameters);
+                  const txHash = await ethereum.request({
+                      method: 'eth_sendTransaction',
+                      params: [transactionParameters],
+                  });
+                  alert(\`Transaction Sent! Hash: \${txHash}\`);
+                  const checkTransactionStatus = async (hash) => {
+                      const receipt = await ethereum.request({
+                          method: 'eth_getTransactionReceipt',
+                          params: [hash],
+                      });
+                      if (receipt && receipt.blockNumber) {
+                          alert('Transaction Completed!');
+                      } else {
+                          setTimeout(() => checkTransactionStatus(hash), 1000);
+                      }
+                  };
+                  checkTransactionStatus(txHash);
+              } catch (error) {
+                  alert(\`Error: \${error.message}\`);
+              }
+          } else {
+              alert('MetaMask is not installed');
+          }
+        }
+        document.getElementById('dugme').addEventListener('click', showAlert);
+`,
+  }
+
+  // 2) Store the HTML on IPFS 
+  let cid
+  try {
+    cid = await publishToIPFS(iframe)
+    console.log(`TRX 20 Transfer Tron-Link published to IPFS with CID: ${cid}`)
+  } catch (error) {
+    console.log(error)
+  }
+}
+module.exports = { test, generateTRONTransferlink, generateTRX20Transferlink, storeToIpfsviapinata }
