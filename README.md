@@ -18,6 +18,8 @@ Inspired by Solana’s **Blinks and Actions** and Ethereum’s **Farcaster Frame
 
 ---
 
+## Smart Contract Addresses
+
 ## How Does TRX-Links Work?
 
 TRX-Links integrates directly with the Tron blockchain and its associated sidechains. When users click on a TRX-Link shared through platforms like Twitter or Telegram, they can execute a range of actions (like sending TRC-20 tokens or interacting with DeFi apps) directly from their browser. The platform securely generates a transaction request, which users can sign with their TronLink wallet or similar extension, completing the transaction without leaving the social media platform.
