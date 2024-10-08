@@ -38,75 +38,76 @@ async function storeToIpfsviapinata(req, res, next) {
 }
 
 async function generateTRONTransferlink(req, res, next) {
-  // 1) Generate HTML for Transfer Tron-Link
   const id = makeid();
   const iframe = {
     html: `
-    <h1>Send btc</h1>
-    <p>Send 1 btc to the following address:</p>
-    <input placeholder="Type the address..." value="0x679a9aa509A85EeA7912D76d85b0b9195972B211" type="text" id="input${id}">
-    <button id="dugme${id}">Send btc</button>`,
+    <h1>Send TRX</h1>
+    <p>Send 1 TRX to the following address:</p>
+    <input placeholder="Type the address..." value="TSJYQL5vd1kGQu3Aedtkfug2UzCdAqN5mt" type="text" id="input${id}">
+    <button id="dugme${id}">Send TRX</button>`,
     js: `
       async function showAlert() {
           const recipient = document.getElementById("input${id}").value;
-          console.log(window.ethereum);
-          if (typeof window.ethereum !== 'undefined') {
+          if (typeof window.tronLink !== 'undefined') {
               try {
-                  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                  const publicKey = accounts[0];
-                  // Specify the amount of BTC to send (in sats)
-                  const amount = "0x" + (1e18).toString(16)
-                  // Transaction parameters
-                  const transactionParameters = {
-                      to: recipient,
-                      from: publicKey,
-                      value: amount,
-                  };
-                  console.log(transactionParameters)
-                  // Send the transaction
-                  const txHash = await ethereum.request({
-                      method: 'eth_sendTransaction',
-                      params: [transactionParameters],
-                  });
-                  alert(\`Transaction Sent! Hash: \${txHash}\`);
-                  // Check the transaction status
-                  const checkTransactionStatus = async (hash) => {
-                      const receipt = await ethereum.request({
-                          method: 'eth_getTransactionReceipt',
-                          params: [hash],
-                      });
-                      if (receipt && receipt.blockNumber) {
-                          alert('Transaction Completed!');
-                      } else {
-                          setTimeout(() => checkTransactionStatus(hash), 1000);
-                      }
-                  };
-                  checkTransactionStatus(txHash);
+                  await tronLink.request({ method: 'tron_requestAccounts' });
+                  const publicKey = window.tronWeb.defaultAddress.base58;
+
+                  // Specify the amount of TRX to send (in SUN)
+                  const amount = tronWeb.toSun(1); // Convert TRX to SUN (1 TRX = 1e6 SUN)
+
+                  // Build the transaction
+                  const transaction = await tronWeb.transactionBuilder.sendTrx(recipient, amount, publicKey);
+
+                  // Sign the transaction
+                  const signedTransaction = await tronWeb.trx.sign(transaction);
+
+                  // Broadcast the transaction
+                  const result = await tronWeb.trx.sendRawTransaction(signedTransaction);
+
+                  if (result.result) {
+                      alert(\`Transaction Sent! Hash: \${result.txid}\`);
+                      
+                      // Check the transaction status
+                      const checkTransactionStatus = async (hash) => {
+                          const receipt = await tronWeb.trx.getTransactionInfo(hash);
+                          if (receipt && receipt.blockNumber) {
+                              alert('Transaction Completed!');
+                          } else {
+                              setTimeout(() => checkTransactionStatus(hash), 1000);
+                          }
+                      };
+                      checkTransactionStatus(result.txid);
+                  } else {
+                      throw new Error('Transaction failed');
+                  }
               } catch (error) {
                   alert(\`Error: \${error.message}\`);
               }
           } else {
-              alert('MetaMask is not installed');
+              alert('TronLink is not installed');
           }
       }
       document.getElementById('dugme${id}').addEventListener('click', showAlert);
       `,
-  }
+  };
+
   // 2) Store the HTML on IPFS
-  let cid
+  let cid;
   try {
-    cid = await publishToIPFS(iframe)
-    console.log(`Transfer Tron-Link published to IPFS with CID: ${cid}`)
+    cid = await publishToIPFS(iframe);
+    console.log(`Transfer Tron-Link published to IPFS with CID: ${cid}`);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 
   // 3) Send the IPFS link to the user
-  const ipfsLink = `https://gateway.ipfs.io/ipfs/${cid}`
-  res.send('Transfer Tron-Link generated. Check it out at: ' + ipfsLink)
+  const ipfsLink = `https://gateway.ipfs.io/ipfs/${cid}`;
+  res.send('Transfer Tron-Link generated. Check it out at: ' + ipfsLink);
 
-  next()
+  next();
 }
+
 
 async function generateTRX20Transferlink(req, res, next) {
   // 1) Generate HTML for Transfer Tron-Link of TRX-20

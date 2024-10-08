@@ -1,13 +1,9 @@
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "eval") {
-    
-    try {
-      //alert(message.code);
-      const result = eval("(()=>{"+message.code+"})()");
-      sendResponse({ result });
-    } catch (error) {
-      sendResponse({ error: error.message });
-    }
-    return true; // Indicate that the response will be sent asynchronously
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === 'getBlock') {
+    fetch(`https://api.trongrid.io/wallet/getblock?num=${request.blockID}`)
+      .then(response => response.json())
+      .then(data => sendResponse(data))
+      .catch(error => sendResponse({ error: error.message }));
+    return true;  // Will respond asynchronously
   }
 });

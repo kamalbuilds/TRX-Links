@@ -2,7 +2,27 @@
 function injectScript(code) {
   const script = document.createElement('script');
   script.setAttribute('type', 'text/javascript');
-  script.textContent = code;
+  script.textContent = `
+    ${code}
+    
+    // Add this to your injected script
+    window.addEventListener('message', function(event) {
+      if (event.source != window) return;
+      if (event.data.type && event.data.type == 'FROM_PAGE') {
+        chrome.runtime.sendMessage(event.data, function(response) {
+          window.postMessage({ type: 'FROM_EXTENSION', data: response }, '*');
+        });
+      }
+    }, false);
+
+    // Helper function to convert TRX to SUN
+    function toSun(trxAmount) {
+      return (trxAmount * 1e6).toString();
+    }
+
+
+    // ... rest of your existing code ...
+  `;
   (document.head || document.documentElement).appendChild(script);
   script.onload = function () {
     script.remove();
@@ -54,8 +74,9 @@ async function replacetronlinkTags() {
 
       if (url1.startsWith("http"))
         url = url1;
-      else if (url1.startsWith("ipfs://"))
-        url = "https://ipfs.io/ipfs/" + url1.substring("ipfs://".length);
+      else if (url1.startsWith("ipfs://")) {
+        url = `https://violet-neighbouring-dolphin-205.mypinata.cloud/ipfs/${url1.substring("ipfs://".length)}?pinataGatewayToken=ztPLlTU-2XHlGq-MJX-o0DNbovxKXA1cefaOuzTdLKt9gbb7PHqdIxJ1k_FzjGKD`;
+      }
 
       console.log(`Fetching URL: ${url}`);  // Debugging information
       if (!url)
@@ -105,12 +126,28 @@ async function replacetronlinkTags() {
   });
 }
 
+// Modify this part
 (function () {
   const script = document.createElement('script');
-  script.src = 'https://cdn.ethers.io/lib/ethers-5.2.umd.min.js';
-  script.onload = function () {
-    // You can put additional code here if needed to run after ethers is loaded
-  };
+  script.textContent = `
+    // Replace direct API calls with postMessage
+    window.tronWeb = {
+      trx: {
+        getBlock: function(blockID) {
+          return new Promise((resolve, reject) => {
+            window.postMessage({ type: 'FROM_PAGE', action: 'getBlock', blockID: blockID }, '*');
+            window.addEventListener('message', function listener(event) {
+              if (event.source != window) return;
+              if (event.data.type && event.data.type == 'FROM_EXTENSION') {
+                window.removeEventListener('message', listener);
+                resolve(event.data.data);
+              }
+            });
+          });
+        }
+      }
+    };
+  `;
   document.head.appendChild(script);
 })();
 

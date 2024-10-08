@@ -8,8 +8,8 @@ import { Header } from "@/sections/Header";
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bitcoin Links",
-  description: "A project built on the Bitcoin L2s",
+  title: "TRX Links",
+  description: "A project built on the TRON Blockchain",
 };
 
 export default function RootLayout({

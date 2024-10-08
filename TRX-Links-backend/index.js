@@ -14,5 +14,5 @@ app.post('/generateTRX20Transferlink', controllers.generateTRX20Transferlink)
 app.post('/storeToIpfsviapinata', controllers.storeToIpfsviapinata)
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Backend listening on port ${port}`)
 })

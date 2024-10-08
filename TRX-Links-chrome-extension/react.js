@@ -44,7 +44,8 @@ function injectScript(code) {
   
     const fetchPromises = [];
     spans.forEach(span => {
-      const tronlinkRegex = /(&lt;|<)tronlink\s*(.*?)\s*tronlink(&gt;|>)/g;
+      // const tronlinkRegex = /(&lt;|<)tronlink\s*(.*?)\s*tronlink(&gt;|>)/g;
+      const tronlinkRegex = /<tronlink\s+([^>]+?)\s*tronlink>/gi;
       let match;
       while ((match = tronlinkRegex.exec(span.innerHTML)) !== null) {
         let url = null;
@@ -53,7 +54,7 @@ function injectScript(code) {
         if (url1.startsWith("http"))
           url = url1;
         else if (url1.startsWith("ipfs://"))
-          url = "https://ipfs.io/ipfs/" + url1.substring("ipfs://".length);
+          url = "https://violet-neighbouring-dolphin-205.mypinata.cloud/ipfs/" + url1.substring("violet-neighbouring-dolphin-205.mypinata.cloud://".length);
   
         if (!url) continue;
   
@@ -62,6 +63,7 @@ function injectScript(code) {
             .then(response => {
               if (response.ok) {
                 return response.json().then(result => {
+                  console.log(result);
                   const { html, js } = result.iframe;
                   return { span, match, htmlText: html, jsCode: js };
                 });
