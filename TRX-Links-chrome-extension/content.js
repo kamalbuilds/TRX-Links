@@ -3,32 +3,141 @@ function injectScript(code) {
   const script = document.createElement('script');
   script.setAttribute('type', 'text/javascript');
   script.textContent = `
-    ${code}
-    
-    // Add this to your injected script
-    window.addEventListener('message', function(event) {
-      if (event.source != window) return;
-      if (event.data.type && event.data.type == 'FROM_PAGE') {
-        chrome.runtime.sendMessage(event.data, function(response) {
-          window.postMessage({ type: 'FROM_EXTENSION', data: response }, '*');
-        });
+    // Simplified TronLink adapter
+    class TronLinkAdapter {
+      constructor() {
+        this.address = null;
+        this.tronWeb = null;
       }
-    }, false);
+
+      async connect() {
+        try {
+          // Wait for tronWeb to be ready
+          // await this.waitForTronWeb();
+          
+          // Request account access
+          if (window.tronLink) {
+            await window.tronLink.request({ method: 'tron_requestAccounts' });
+          } else {
+            throw new Error('TronLink not found. Please install TronLink extension.');
+          }
+          
+          if (!window.tronWeb) {
+            throw new Error('TronWeb not found after TronLink connection.');
+          }
+
+          this.tronWeb = window.tronWeb;
+
+          return this.address;
+        } catch (error) {
+          console.error('Connection error:', error);
+          throw error;
+        }
+      }
+
+
+      async signTransaction(transaction) {
+        if (!this.tronWeb) {
+          throw new Error('TronWeb is not available');
+        }
+        return await this.tronWeb.trx.sign(transaction);
+      }
+    }
+
+    const adapter = new TronLinkAdapter();
+
+    async function connectWallet() {
+      try {
+        const address = await adapter.connect();
+        console.log('Connected successfully: ', address);
+        return address;
+      } catch (error) {
+        console.error('Connection error:', error);
+        throw error;
+      }
+    }
+
+    async function signAndSendTransaction(toAddress, amount) {
+      if (!adapter.address) {
+        await connectWallet();
+      }
+
+      console.log(adapter.address,"address",adapter);
+      
+      const tronWeb = adapter.tronWeb;
+      if (!tronWeb) {
+        throw new Error('TronWeb is not available');
+      }
+
+      console.log(tronWeb.transactionBuilder,"transactionBuilder");
+      const transaction = await tronWeb.transactionBuilder.sendTrx(toAddress, tronWeb.toSun(amount), adapter.address);
+      const signedTransaction = await adapter.signTransaction(transaction);
+      const res = await tronWeb.trx.sendRawTransaction(signedTransaction);
+      console.log('Transaction sent successfully:', res);
+      return res;
+    }
 
     // Helper function to convert TRX to SUN
     function toSun(trxAmount) {
-      return (trxAmount * 1e6).toString();
+      if (!adapter.tronWeb) {
+        throw new Error('TronWeb is not available');
+      }
+      return adapter.tronWeb.toSun(trxAmount);
     }
 
+    ${code}
 
-    // ... rest of your existing code ...
+    async function sendDonation(amount) {
+      const recipient = 'TSJYQL5vd1kGQu3Aedtkfug2UzCdAqN5mt'; // Replace with actual recipient address
+      try {
+        const result = await signAndSendTransaction(recipient, amount);
+        if (result.result) {
+          console.log('Donation successful:', result.txid);
+          showSuccess();
+        } else {
+          throw new Error('Transaction failed');
+        }
+      } catch (error) {
+        console.error('Donation error:', error);
+        alert('Donation failed: ' + error.message);
+      }
+    }
+
+    function showSuccess() {
+      alert('Donation successful!');
+    }
+
+    // Use MutationObserver to watch for the donate button
+    const observer = new MutationObserver((mutations, obs) => {
+      const donateButton = document.getElementById('donateButton');
+      if (donateButton) {
+        donateButton.addEventListener('click', async () => {
+          const amountInput = document.getElementById('donationAmount');
+          if (!amountInput) {
+            console.error('Donation amount input not found');
+            return;
+          }
+          const amount = amountInput.value;
+          if (isNaN(amount) || amount <= 0) {
+            alert('Please enter a valid donation amount.');
+            return;
+          }
+          await sendDonation(amount);
+        });
+        obs.disconnect(); // Stop observing once we've added the event listener
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   `;
   (document.head || document.documentElement).appendChild(script);
   script.onload = function () {
     script.remove();
   };
 }
-
 
 const makeid = () => {
   return Math.floor(Math.random() * 100000000)
