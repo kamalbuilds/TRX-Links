@@ -1,4 +1,4 @@
-## TRX-Links Chrome extension
+## Tron-Links Chrome extension
 
 This extension is designed to replace custom `<tronlink ... tronlink>` tags (or their HTML-encoded equivalent `&lt;tronlink ... tronlink&gt;`) in web pages with dynamic HTML content fetched from URLs. Here's a breakdown of how it works:
 
@@ -25,4 +25,4 @@ This extension is designed to replace custom `<tronlink ... tronlink>` tags (or 
 ### **Overall Purpose:**
 The extension is likely intended for a specific use case where `<tronlink ... tronlink>` tags are used as placeholders for dynamic content on certain pages (possibly on a specific domain like `x.com`). The extension fetches and injects this content, allowing for dynamic updating of the web page based on external data or scripts. 
 
-This is useful in our TRX-Links where content needs to be updated in real-time, such as in the pages on X that pull in data from decentralized networks like IPFS.
+This is useful in our BTC-Links where content needs to be updated in real-time, such as in the pages on X that pull in data from decentralized networks like IPFS.
