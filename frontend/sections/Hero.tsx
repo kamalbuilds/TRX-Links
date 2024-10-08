@@ -34,9 +34,7 @@ export const Hero = () => {
               TRX Links
             </h1>
             <p className="text-xl text-[#010D3E] tracking-tight mt-6">
-              Celebrate the joy of accomplishment with an app designed to track
-              your progress, motivate your efforts, and celebrate your
-              successes.
+              Bringing Tron Defi to Everyones Reach
             </p>
             <div className="flex gap-1 items-center mt-[30px]">
               <Link href="/create" >

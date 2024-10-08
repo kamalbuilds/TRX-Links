@@ -1,6 +1,6 @@
 "use client";
 import productImage from "@/assets/product-image.png";
-import Templates from "@/assets/Templates.png";
+import Templates from "@/assets/Template.png";
 import pyramidImage from "@/assets/pyramid.png";
 import tubeImage from "@/assets/tube.png";
 import Image from "next/image";
@@ -21,14 +21,13 @@ export const ProductShowcase = () => {
                     <div className="flex justify-center">
                         <div className="tag">TRX Links</div>
                     </div>
-                    <h2 className="section-title mt-5">A more effective way to track progress</h2>
+                    <h2 className="section-title mt-5">Seamless Tron Transactions in Social Media</h2>
                     <p className="section-description mt-5">
-                        Effortlessly turn your ideas into a fully functional, responsive, SaaS website in just minutes
-                        with this template.
+                        Transform your social media experience with TRX Links. Send tokens, interact with DeFi, and bridge chains - all through simple, shareable links on platforms you already use.
                     </p>
                 </div>
                 <div className="relative">
-                    <Image src={Templates} alt="Templates Image" className="mt-10 rounded-3xl" />
+                    <Image src={Templates} alt="TRX Links Templates" className="mt-10 rounded-3xl" />
                     <motion.img
                         src={pyramidImage.src}
                         alt="Pyramid Image"

@@ -198,7 +198,7 @@ function CreateBlink2({ currentBlinkObject, setCurrentBlinkObject, handleNextCli
 
   return (
     <div style={{ padding: '10px', zoom: '0.67' }}>
-      <h4>Lets Edit your Bitcoin Link</h4>
+      <h4>Lets Edit your TRX Link</h4>
       <a style={{ fontSize: '1.1em' }}>Click On the element You Want To Edit And Change Its Color, Text or Image</a>
       {isLoading ? (
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '50%', flexDirection: 'column-reverse' }}>

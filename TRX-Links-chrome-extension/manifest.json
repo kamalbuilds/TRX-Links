@@ -16,7 +16,9 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.x.com/*"
+        "*://*.x.com/*",
+        "*://*.discord.com/*",
+        "*://*.web.telegram.org/*"
       ],
       "js": [
         "content.js"

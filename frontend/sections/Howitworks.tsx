@@ -14,8 +14,8 @@ const pricingTiers = [
         features: [
             "Choose templates",
             "Choose Bridging Assets",
-            "Choose Donation using BRC20",
-            "Choose Donation using Runes",
+            "Choose Donation using TRX 20",
+            "Choose Donation using Stable Coins",
         ],
     },
     {

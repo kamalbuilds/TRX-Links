@@ -179,4 +179,6 @@ async function generateTRX20Transferlink(req, res, next) {
     console.log(error)
   }
 }
+
+
 module.exports = { test, generateTRONTransferlink, generateTRX20Transferlink, storeToIpfsviapinata }
